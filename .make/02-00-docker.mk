@@ -20,14 +20,6 @@ DOCKER_SERVICE_NAME_PHP_FPM:=php-fpm
 DOCKER_SERVICE_NAME_PHP_WORKER:=php-worker
 DOCKER_SERVICE_NAME_APPLICATION:=application
 
-# FYI:
-# Naming convention for images is $(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE)/$(DOCKER_SERVICE_NAME)-$(ENV)
-# e.g.               docker.io/dofroscra/nginx-local
-# $(DOCKER_REGISTRY)---^          ^       ^      ^        docker.io
-# $(DOCKER_NAMESPACE)-------------^       ^      ^        dofroscra
-# $(DOCKER_SERVICE_NAME)------------------^      ^        nginx
-# $(ENV)-----------------------------------------^        local
-
 DOCKER_DIR:=./.docker
 DOCKER_ENV_FILE:=$(DOCKER_DIR)/.env
 DOCKER_COMPOSE_DIR:=$(DOCKER_DIR)/docker-compose
