@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('artist');
             $table->string('category');
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

@@ -17,7 +17,11 @@ class SongsFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'name' => $this->faker->name(),
+            'price' => $this->faker->randomFloat(2,0,100),
+            'title' => $this->faker->name(),
+            'artist' => $this->faker->name(),
+            'category' => $this->faker->name(),
         ];
     }
 }
