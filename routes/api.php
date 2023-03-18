@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use \App\Http\Controllers\Api\AlbumController;
+use \App\Http\Controllers\AlbumController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,4 +19,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::apiResource('albums', AlbumController::class);
+Route::resource('albums', AlbumController::class);
