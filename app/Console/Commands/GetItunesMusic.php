@@ -36,6 +36,7 @@ class GetItunesMusic extends Command
         $content =  json_decode($response->getBody(), true);
 
         $formattedData = [];
+        $time = now();
         foreach ($content['feed']['entry'] as $album) {
             $formattedData[] = [
                 'name' => $album['im:name']['label'],
@@ -43,6 +44,8 @@ class GetItunesMusic extends Command
                 'title' => $album['title']['label'],
                 'artist' => $album['im:artist']['label'],
                 'category' => $album['category']['attributes']['label'],
+                'created_at' => $time,
+                'updated_at' => $time
             ];
         }
         Songs::insert($formattedData);

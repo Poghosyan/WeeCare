@@ -22,12 +22,11 @@ class AlbumController extends TestCase
      *
      * @return void
      */
-    public function test_example()
+    public function test_albums()
     {
         Songs::factory()->create();
         $response = $this->getJson('/api/albums');
         Log::debug(json_encode($response));
-
         $response->assertStatus(200);
     }
 }

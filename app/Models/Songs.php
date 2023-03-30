@@ -9,5 +9,5 @@ class Songs extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['reference', 'name'];
+    protected $fillable = ['name'];
 }

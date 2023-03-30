@@ -19,4 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::resource('albums', AlbumController::class);
+Route::resource('/albums', AlbumController::class);
+
+Route::get('/albums/sort/{column1}/{column2?}', [AlbumController::class, 'getSorted']);
