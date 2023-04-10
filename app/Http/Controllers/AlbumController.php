@@ -88,7 +88,8 @@ class AlbumController extends Controller
         //
     }
 
-    public function getSorted(Request $request, string $column1, string $column2 = 'id') {
+    public function getSorted(Request $request, string $column1, string $column2 = 'id')
+    {
         $columns = Schema::getColumnListing('songs');
 
         $validator = Validator::make(['sort' => [$column1, $column2] ], [
@@ -97,7 +98,7 @@ class AlbumController extends Controller
                     function ($attribute, $values, $fail) use ($columns) {
                         foreach ($values as $value) {
                             if (!in_array($value, $columns)) {
-                                $str = 'The '.$attribute.' is invalid. Only allowed';
+                                $str = 'The ' . $attribute . ' is invalid. Only allowed';
                                 foreach ($columns as $column) {
                                     $str = "$str $column";
                                 }
@@ -106,11 +107,10 @@ class AlbumController extends Controller
                         }
                     },
                 ],
-            ]
-        );
+            ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors'=>$validator->errors()]);
+            return response()->json(['errors' => $validator->errors()]);
         }
 
         $songs = Songs::orderBy($column1)->get();

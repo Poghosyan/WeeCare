@@ -10,7 +10,9 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class InsertInDbJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
 
     public function __construct(
         public readonly string $jobId
