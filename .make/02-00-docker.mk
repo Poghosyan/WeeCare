@@ -48,6 +48,24 @@ EXECUTE_IN_APPLICATION_CONTAINER?=
 
 DOCKER_SERVICE_NAME?=
 
+# Add the -T options to "docker compose exec" to avoid the
+# "panic: the handle is invalid"
+# error on Windows and Linux
+# @see https://stackoverflow.com/a/70856332/413531
+DOCKER_COMPOSE_EXEC_OPTIONS=-T
+
+# OS is defined for WIN systems, so "uname" will not be executed
+OS?=$(shell uname)
+ifeq ($(OS),Windows_NT)
+    # Windows requires the .exe extension, otherwise the entry is ignored
+    # @see https://stackoverflow.com/a/60318554/413531
+    SHELL := bash.exe
+else ifeq ($(OS),Darwin)
+    # On Mac, the -T must be omitted to avoid cluttered output
+    # @see https://github.com/moby/moby/issues/37366#issuecomment-401157643
+    DOCKER_COMPOSE_EXEC_OPTIONS=
+endif
+
 # we can pass EXECUTE_IN_CONTAINER=true to a make invocation in order to execute the target in a docker container.
 # Caution: this only works if the command in the target is prefixed with a $(EXECUTE_IN_*_CONTAINER) variable.
 # If EXECUTE_IN_CONTAINER is NOT defined, we will check if make is ALREADY executed in a docker container.
@@ -63,9 +81,9 @@ ifndef EXECUTE_IN_CONTAINER
 	endif
 endif
 ifeq ($(EXECUTE_IN_CONTAINER),true)
-	EXECUTE_IN_ANY_CONTAINER:=$(DOCKER_COMPOSE) exec -T --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME)
-	EXECUTE_IN_APPLICATION_CONTAINER:=$(DOCKER_COMPOSE) exec -T --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME_APPLICATION)
-	EXECUTE_IN_WORKER_CONTAINER:=$(DOCKER_COMPOSE) exec -T --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME_PHP_WORKER)
+    EXECUTE_IN_ANY_CONTAINER:=$(DOCKER_COMPOSE) exec $(DOCKER_COMPOSE_EXEC_OPTIONS) --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME)
+    EXECUTE_IN_APPLICATION_CONTAINER:=$(DOCKER_COMPOSE) exec $(DOCKER_COMPOSE_EXEC_OPTIONS) --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME_APPLICATION)
+    EXECUTE_IN_WORKER_CONTAINER:=$(DOCKER_COMPOSE) exec $(DOCKER_COMPOSE_EXEC_OPTIONS) --user $(APP_USER_NAME) $(DOCKER_SERVICE_NAME_PHP_WORKER)
 endif
 
 
