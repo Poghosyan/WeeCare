@@ -1,5 +1,11 @@
 ##@ [Application: QA]
 
+# constants
+ ## files
+ALL_FILES=./
+APP_FILES=app/
+TEST_FILES=tests/
+
 .PHONY: test
 test: ## Run the test suite
 	$(EXECUTE_IN_WORKER_CONTAINER) vendor/bin/phpunit -c phpunit.xml
@@ -19,22 +25,42 @@ PHPUNIT_CMD=php vendor/bin/phpunit
 PHPUNIT_ARGS= -c phpunit.xml
 PHPUNIT_FILES=
 
+.PHONY: test
+test: ## Run all tests
+	@$(EXECUTE_IN_APPLICATION_CONTAINER) $(PHPUNIT_CMD) $(PHPUNIT_ARGS) $(ARGS)
+
 PHPCS_CMD=php vendor/bin/phpcs
 PHPCS_ARGS=--parallel=$(CORES) --standard=psr12
 PHPCS_FILES=$(APP_FILES)
 
+.PHONY: phpcs
+phpcs: ## Run style check on all application files
+	@$(call execute,$(PHPCS_CMD),$(PHPCS_ARGS),$(PHPCS_FILES), $(ARGS))
+
 PHPCBF_CMD=php vendor/bin/phpcbf
 PHPCBF_ARGS=$(PHPCS_ARGS)
 PHPCBF_FILES=$(PHPCS_FILES)
+
+.PHONY: phpcbf
+phpcbf: ## Run style fixer on all application files
+	@$(call execute,$(PHPCBF_CMD),$(PHPCBF_ARGS),$(PHPCBF_FILES), $(ARGS))
 
 # vendor/bin/parallel-lint -j 4 --exclude .git --exclude vendor ./
 PARALLEL_LINT_CMD=php vendor/bin/parallel-lint
 PARALLEL_LINT_ARGS=-j 4 --exclude vendor/ --exclude .docker --exclude .git
 PARALLEL_LINT_FILES=$(ALL_FILES)
 
+.PHONY: phplint
+phplint: ## Run phplint on all files
+	@$(call execute,$(PARALLEL_LINT_CMD),$(PARALLEL_LINT_ARGS),$(PARALLEL_LINT_FILES), $(ARGS))
+
 # vendor/bin/composer-require-checker check
 COMPOSER_REQUIRE_CHECKER_CMD=php vendor/bin/composer-require-checker
 COMPOSER_REQUIRE_CHECKER_ARGS=--ignore-parse-errors
+
+.PHONY: composer-require-checker
+composer-require-checker: ## Run dependency checker
+	@$(call execute,$(COMPOSER_REQUIRE_CHECKER_CMD),$(COMPOSER_REQUIRE_CHECKER_ARGS),"", $(ARGS))
 
 # Used to run all components
 # variables
@@ -61,6 +87,10 @@ qa-exec: phpstan \
 NO_PROGRESS?=false
 ifeq ($(NO_PROGRESS),true)
     PHPSTAN_ARGS+= --no-progress
+    PARALLEL_LINT_ARGS+= --no-progress
+else
+    PHPCS_ARGS+= -p
+    PHPCBF_ARGS+= -p
 endif
 
 ## bash colors
