@@ -84,3 +84,18 @@ RUN apk add --no-cache --update \
     # ensure that xdebug is not enabled by default
     && rm -f /etc/php8/conf.d/00_xdebug.ini
 
+# install git-secret
+# @see https://git-secret.io/installation#alpine
+ADD https://gitsecret.jfrog.io/artifactory/api/security/keypair/public/repositories/git-secret-apk /etc/apk/keys/git-secret-apk.rsa.pub
+
+RUN echo "https://gitsecret.jfrog.io/artifactory/git-secret-apk/all/main" >> /etc/apk/repositories  && \
+    apk add --update --no-cache \
+        bash \
+        git-secret \
+        gawk \
+        gnupg \
+        make
+
+# Fix the git permission issue
+RUN git config --system --add safe.directory "$APP_CODE_PATH"
+

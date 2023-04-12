@@ -6,10 +6,6 @@ ALL_FILES=./
 APP_FILES=app/
 TEST_FILES=tests/
 
-.PHONY: test
-test: ## Run the test suite
-	$(EXECUTE_IN_WORKER_CONTAINER) vendor/bin/phpunit -c phpunit.xml
-
 # vendor/bin/phpstan analyse app tests --level=9
 PHPSTAN_CMD=php vendor/bin/phpstan analyse
 PHPSTAN_ARGS=--level=9
