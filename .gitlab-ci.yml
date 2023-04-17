@@ -93,5 +93,5 @@ QA and Tests:
     paths:
       # the quotes are required
       # @see https://stackoverflow.com/questions/38009869/how-to-specify-wildcard-artifacts-subdirectories-in-gitlab-ci-yml#comment101411265_38055730
-      - ".build/*"
+      - .build/*
     expire_in: 1 week
