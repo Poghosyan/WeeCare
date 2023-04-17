@@ -86,12 +86,12 @@ QA and Tests:
 #    # @see https://stackoverflow.com/a/55464100/413531
 #    - if [ "$FAILED" == "true" ]; then exit 1; fi
 #
-#  # Save the build artifact, e.g. the JUNIT report.xml file, so we can download it later
-#  # @see https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html
-#  artifacts:
-#    when: always
-#    paths:
-#      # the quotes are required
-#      # @see https://stackoverflow.com/questions/38009869/how-to-specify-wildcard-artifacts-subdirectories-in-gitlab-ci-yml#comment101411265_38055730
-#      - ".build/*"
-#    expire_in: 1 week
+  # Save the build artifact, e.g. the JUNIT report.xml file, so we can download it later
+  # @see https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html
+  artifacts:
+    when: always
+    paths:
+      # the quotes are required
+      # @see https://stackoverflow.com/questions/38009869/how-to-specify-wildcard-artifacts-subdirectories-in-gitlab-ci-yml#comment101411265_38055730
+      - ".build/*"
+    expire_in: 1 week
