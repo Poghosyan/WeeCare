@@ -59,11 +59,11 @@ RUN apk --update-cache add ca-certificates && \
 # make bash default shell
 RUN sed -e 's;/bin/ash$;/bin/bash;g' -i /etc/passwd
 
-COPY ./images/php/base/conf.d/zz-app.ini /etc/php8/conf.d/
-COPY ./images/php/base/conf.d/zz-app-${ENV}.ini /etc/php8/conf.d/
+COPY ./.docker/images/php/base/conf.d/zz-app.ini /etc/php8/conf.d/
+COPY ./.docker/images/php/base/conf.d/zz-app-${ENV}.ini /etc/php8/conf.d/
 
-COPY ./images/php/base/.bashrc /home/${APP_USER_NAME}/.bashrc
-COPY ./images/php/base/.bashrc /root/.bashrc
+COPY ./.docker/images/php/base/.bashrc /home/${APP_USER_NAME}/.bashrc
+COPY ./.docker/images/php/base/.bashrc /root/.bashrc
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 

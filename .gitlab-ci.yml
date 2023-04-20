@@ -49,7 +49,7 @@ QA and Tests:
     - start_docker_up=$(date +%s)
     - make docker-up
     - end_docker_up=$(date +%s)
-    - gpg-import-default-secret-key gpg-import-default-public-keys
+    - gpg-import GPG_KEY_FILES="secret.gpg" gpg-import GPG_KEY_FILES=".dev/gpg-keys/*"
     - git-secret reveal -f -p $GPG_PASSWORD
 
     ## QA
