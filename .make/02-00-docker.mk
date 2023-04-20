@@ -1,8 +1,3 @@
-# For local builds we always want to use "latest" as tag per default
-ifeq ($(ENV),local)
-	TAG:=latest
-endif
-
 # Enable buildkit for docker and docker-compose by default for every environment.
 # For specific environments (e.g. MacBook with Apple Silicon M1 CPU) it should be turned off to work stable
 # - this can be done in the .make/.env file
@@ -38,7 +33,8 @@ endif
 
 # we need a couple of environment variables for docker-compose so we define a make-variable that we can
 # then reference later in the Makefile without having to repeat all the environment variables
-DOCKER_COMPOSE_COMMAND:=ENV=$(ENV) \
+DOCKER_COMPOSE_COMMAND:= \
+ ENV=$(ENV) \
  TAG=$(TAG) \
  DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
  DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) \
@@ -55,24 +51,6 @@ EXECUTE_IN_WORKER_CONTAINER?=
 EXECUTE_IN_APPLICATION_CONTAINER?=
 
 DOCKER_SERVICE_NAME?=
-
-# Add the -T options to "docker compose exec" to avoid the
-# "panic: the handle is invalid"
-# error on Windows and Linux
-# @see https://stackoverflow.com/a/70856332/413531
-DOCKER_COMPOSE_EXEC_OPTIONS=-T
-
-# OS is defined for WIN systems, so "uname" will not be executed
-OS?=$(shell uname)
-ifeq ($(OS),Windows_NT)
-    # Windows requires the .exe extension, otherwise the entry is ignored
-    # @see https://stackoverflow.com/a/60318554/413531
-    SHELL := bash.exe
-else ifeq ($(OS),Darwin)
-    # On Mac, the -T must be omitted to avoid cluttered output
-    # @see https://github.com/moby/moby/issues/37366#issuecomment-401157643
-    DOCKER_COMPOSE_EXEC_OPTIONS=
-endif
 
 # we can pass EXECUTE_IN_CONTAINER=true to a make invocation in order to execute the target in a docker container.
 # Caution: this only works if the command in the target is prefixed with a $(EXECUTE_IN_*_CONTAINER) variable.

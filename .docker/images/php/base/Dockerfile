@@ -26,7 +26,7 @@ RUN addgroup -g $APP_GROUP_ID $APP_GROUP_NAME && \
     adduser -D -u $APP_USER_ID -s /bin/bash $APP_USER_NAME -G $APP_GROUP_NAME && \
     mkdir -p $APP_CODE_PATH && \
     chown -R $APP_USER_NAME: $APP_CODE_PATH
-    
+
 RUN apk add --update --no-cache \
         bash \
         make \
@@ -53,7 +53,7 @@ RUN apk --update-cache add ca-certificates && \
         php-xml~=${TARGET_PHP_VERSION} \
         php8~=${TARGET_PHP_VERSION} \
 # make "php" as command available by creating a symlink
-# https://github.com/codecasts/php-alpine/issues/20#issuecomment-350477886    
+# https://github.com/codecasts/php-alpine/issues/20#issuecomment-350477886
     && ln -s /usr/bin/php8 /usr/bin/php
 
 # make bash default shell
@@ -68,21 +68,6 @@ COPY ./images/php/base/.bashrc /root/.bashrc
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR $APP_CODE_PATH
-
-FROM base as local
-
-# add app user to sudoers
-# see https://ostechnix.com/add-delete-and-grant-sudo-privileges-to-users-in-alpine-linux/ for adding sudo
-# see https://askubuntu.com/a/340669 for not requiring a sudo pw
-RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
-    echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
-
-RUN apk add --no-cache --update \
-        mysql-client \
-        redis \
-        php-xdebug~=${TARGET_PHP_VERSION} \
-    # ensure that xdebug is not enabled by default
-    && rm -f /etc/php8/conf.d/00_xdebug.ini
 
 # install git-secret
 # @see https://git-secret.io/installation#alpine
@@ -99,3 +84,47 @@ RUN echo "https://gitsecret.jfrog.io/artifactory/git-secret-apk/all/main" >> /et
 # Fix the git permission issue
 RUN git config --system --add safe.directory "$APP_CODE_PATH"
 
+FROM base as codebase
+
+# By only copying the composer files required to run composer install
+# the layer will be cached and only invalidated when the composer dependencies are changed
+COPY ./composer.json /dependencies/
+COPY ./composer.lock /dependencies/
+
+# use a cache mount to cache the composer dependencies
+# this is essentially a cache that lives in Docker BuildKit (i.e. has nothing to do with the host system)
+RUN --mount=type=cache,target=/tmp/.composer \
+    cd /dependencies && \
+    # COMPOSER_HOME=/tmp/.composer sets the home directory of composer that
+    # also controls where composer looks for the cache
+    # so we don't have to download dependencies again (if they are cached)
+    COMPOSER_HOME=/tmp/.composer composer install --no-scripts --no-plugins --no-progress -o
+
+# copy the full codebase
+COPY . /codebase
+
+RUN mv /dependencies/vendor /codebase/vendor && \
+    cd /codebase && \
+    # remove files we don't require in the image to keep the image size small
+    rm -rf .docker/ && \
+    # we need a git repository for git-secret to work (can be an empty one)
+    git init
+
+FROM base as ci
+
+COPY --from=codebase --chown=$APP_USER_NAME:$APP_GROUP_NAME /codebase $APP_CODE_PATH
+
+FROM base as local
+
+# add app user to sudoers
+# see https://ostechnix.com/add-delete-and-grant-sudo-privileges-to-users-in-alpine-linux/ for adding sudo
+# see https://askubuntu.com/a/340669 for not requiring a sudo pw
+RUN echo "root ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users" && \
+    echo "${APP_USER_NAME} ALL=(ALL) NOPASSWD: ALL " | tee -a "/etc/sudoers.d/users"
+
+RUN apk add --no-cache --update \
+        mysql-client \
+        redis \
+        php-xdebug~=${TARGET_PHP_VERSION} \
+    # ensure that xdebug is not enabled by default
+    && rm -f /etc/php8/conf.d/00_xdebug.ini
